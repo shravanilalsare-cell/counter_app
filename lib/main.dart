@@ -1,139 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'bloc/counter/counter_bloc.dart';
-import 'bloc/counter/counter_event.dart';
+import 'bloc/student_bloc.dart';
+import 'bloc/student_state.dart';
+import 'widgets/student_card.dart';
+import 'widgets/task_counter.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const StudentDashboardApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'BLOC Counter',
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-      ),
-      home: const CounterPage(),
-    );
-  }
-}
-
-class CounterPage extends StatelessWidget {
-  const CounterPage({super.key});
+class StudentDashboardApp extends StatelessWidget {
+  const StudentDashboardApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => CounterBloc(),
-      child: const CounterView(),
+      create: (_) => StudentBloc(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Student Dashboard',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+          ),
+          useMaterial3: true,
+        ),
+        home: const StudentDashboard(),
+      ),
     );
   }
 }
 
-class CounterView extends StatelessWidget {
-  const CounterView({super.key});
+class StudentDashboard extends StatelessWidget {
+  const StudentDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CounterBloc, CounterState>(
-      listener: (context, state) {
-        if (state.counter == 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Counter Reset!'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Student Dashboard'),
+        centerTitle: true,
+      ),
+      body: BlocBuilder<StudentBloc, StudentState>(
+        builder: (context, state) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                StudentCard(
+                  completedTasks: state.completedTasks,
+                ),
+
+                const SizedBox(height: 20),
+
+                const TaskCounter(),
+              ],
             ),
           );
-        }
-
-        if (state.counter == 10) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Maximum limit reached'),
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('BLOC Counter'),
-          centerTitle: true,
-        ),
-        body: Center(
-          child: BlocBuilder<CounterBloc, CounterState>(
-            builder: (context, state) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Counter',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    '${state.counter}',
-                    style: const TextStyle(
-                      fontSize: 60,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: state.counter == 10
-                            ? null
-                            : () {
-                                context
-                                    .read<CounterBloc>()
-                                    .add(Increment());
-                              },
-                        child: const Text('➕ Increment'),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      ElevatedButton(
-                        onPressed: state.counter == 0
-                            ? null
-                            : () {
-                                context
-                                    .read<CounterBloc>()
-                                    .add(Decrement());
-                              },
-                        child: const Text('➖ Decrement'),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      context
-                          .read<CounterBloc>()
-                          .add(Reset());
-                    },
-                    child: const Text('🔄 Reset'),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+        },
       ),
     );
   }
